@@ -1,34 +1,14 @@
 <template>
-  <div id="app">
-    <fieldset>
-      {{ todos }}
-    </fieldset>
-    <button @click="createTodo">Create todo</button>
-  </div>
+  <todos/>
 </template>
 
 <script>
 
-import AddTodo from './AddTodo'
-
+import Todos from './Todo/Main'
 export default {
   name: 'app',
-  data () {
-    return {
-      todoText: ''
-    }
-  },
-  mounted(){
-  },
-  methods:{
-    createTodo(  ) {
-      this.$modal.show(AddTodo)
-    },
-  },
-  computed: {
-    todos() {
-      return this.$store.getters['todo/list']
-    }
+  components: {
+    Todos
   }
 }
 </script>
