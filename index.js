@@ -1,8 +1,4 @@
-// import Modal from './Modal.vue'
-// import Dialog from './Dialog.vue'
 import ModalsContainer from './ModalsContainer.vue'
-import Vue from 'vue'
-
 
 const Plugin = {
 	install(Vue, options = {}) {
@@ -13,6 +9,8 @@ const Plugin = {
 
 		this.installed = true
     
+    this.event = new Vue()
+
     const AppendChild = function( vm, el, component, componentConfig = {} ) {
       const extended = Vue.extend( component )
 
@@ -27,13 +25,29 @@ const Plugin = {
 
     class Modal {
 
-      constructor( vm, component ) {
+      
+      constructor( vm, component, eventsVM ) {
+        this.event = eventsVM
+        this._callHook('beforeCreate', this)
         this.vm = vm
         this.component = component
         this._modalContainerInstance = null
         this._contentComponentInstance = null
         this.isDestroyed = false
         this.isOpen = false
+        this._callHook('created', this)
+      }
+
+      _callHook( hook, data ) {
+        this.event.$emit( hook, data )
+      }
+
+      get $on () {
+        return this.event.$on
+      }
+
+      get $off () {
+        return this.event.$off
       }
 
       _createVmChild( target, component, content ) {
@@ -56,7 +70,6 @@ const Plugin = {
       }
 
       _destroyInstances() {
-
         if( this.isDestroyed ) {
           return;
         }
@@ -68,25 +81,28 @@ const Plugin = {
       }
 
       open( propsData, listeners ) {
+        this._callHook('beforeMount', this)
         this._instantiate( { propsData, listeners } )
         this._setupListeners()
         this.isOpen = true
+        this._callHook('mounted', this._contentComponentInstance)
       }
 
       close() {
+
+        const content = this._contentComponentInstance
+        this._callHook('beforeDestroy', content)
 
         if( !this.isOpen ) {
           return;
         }
 
-        console.log( this )
-
         this._destroyInstances()
+        this._callHook('destroyed', content)
+        return content
       }
 
     }
-
-    this.event = new Vue()
 
     Vue.mixin( {
 
@@ -96,13 +112,9 @@ const Plugin = {
             show : ( Component, props, listeners ) => {
 
               const vm = this;
-
-              const modal = new Modal( vm, Component )
-              
+              const modal = new Modal( vm, Component, Plugin.event )
               modal.open( props, listeners )
-              
               return modal
-
             }
           }
         }
