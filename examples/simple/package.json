@@ -1,0 +1,29 @@
+{
+	"name": "demo",
+	"version": "1.0.0",
+	"scripts": {
+		"dev": "./node_modules/parcel-bundler/bin/cli.js ."
+	},
+	"dependencies": {
+		"vue": "^2.5.16",
+		"vuex": "^3.0.1"
+	},
+	"devDependencies": {
+		"@vue/component-compiler-utils": "^1.2.1",
+		"babel-core": "^6.0.0",
+		"babel-loader": "^6.0.0",
+		"babel-preset-env": "^1.7.0",
+		"babel-preset-latest": "^6.0.0",
+		"cross-env": "^3.0.0",
+		"css-loader": "^0.25.0",
+		"file-loader": "^0.9.0",
+		"node-sass": "^4.5.0",
+		"parcel-bundler": "^1.8.1",
+		"parcel-plugin-vue": "^1.5.0",
+		"sass-loader": "^5.0.1",
+		"vue-loader": "^11.1.4",
+		"vue-template-compiler": "^2.2.1",
+		"webpack": "^2.2.0",
+		"webpack-dev-server": "^2.2.0"
+	}
+}
