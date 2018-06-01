@@ -1,32 +1,32 @@
 import ModalsContainer from './ModalsContainer.vue'
 
 const Plugin = {
-	install(Vue, options = {}) {
-    
-		if (this.installed) {
-			return
-		}
+  install(Vue, options = {}) {
 
-		this.installed = true
-    
+    if (this.installed) {
+      return
+    }
+
+    this.installed = true
+
     this.event = new Vue()
 
-    const AppendChild = function( vm, el, component, componentConfig = {} ) {
-      const extended = Vue.extend( component )
+    const AppendChild = function (vm, el, component, componentConfig = {}) {
+      const extended = Vue.extend(component)
 
       componentConfig['parent'] = vm
-      const instance = new extended( componentConfig )
+      const instance = new extended(componentConfig)
 
       instance.$mount()
-      el.appendChild( instance.$el )
+      el.appendChild(instance.$el)
 
       return instance
     }
 
     class Modal {
 
-      
-      constructor( vm, component, eventsVM ) {
+
+      constructor(vm, component, eventsVM) {
         this.event = eventsVM
         this._callHook('beforeCreate', this)
         this.vm = vm
@@ -38,25 +38,25 @@ const Plugin = {
         this._callHook('created', this)
       }
 
-      _callHook( hook, data ) {
-        this.event.$emit( hook, data )
+      _callHook(hook, data) {
+        this.event.$emit(hook, data)
       }
 
-      get $on () {
+      get $on() {
         return this.event.$on
       }
 
-      get $off () {
+      get $off() {
         return this.event.$off
       }
 
-      _createVmChild( target, component, content ) {
-        return AppendChild( this.vm, target, component, content )
+      _createVmChild(target, component, content) {
+        return AppendChild(this.vm, target, component, content)
       }
 
-      _instantiate( contentConfig ) {
-        this._modalContainerInstance = this._createVmChild( this.vm.$el, ModalsContainer )
-        this._contentComponentInstance = this._createVmChild( this._modalContainerInstance.$refs.content, this.component, contentConfig )
+      _instantiate(contentConfig) {
+        this._modalContainerInstance = this._createVmChild(this.vm.$root.$el, ModalsContainer, contentConfig)
+        this._contentComponentInstance = this._createVmChild(this._modalContainerInstance.$refs.content, this.component, contentConfig)
       }
 
       _setupListeners() {
@@ -70,19 +70,21 @@ const Plugin = {
       }
 
       _destroyInstances() {
-        if( this.isDestroyed ) {
+        if (this.isDestroyed) {
           return;
         }
 
-        this.vm.$el.removeChild( this._modalContainerInstance.$el )
+        this.vm.$root.$el.removeChild(this._modalContainerInstance.$el)
         this._contentComponentInstance.$destroy(true)
         this._modalContainerInstance.$destroy(true)
         this.isDestroyed = true
       }
 
-      open( propsData, listeners ) {
+      open(attributes = {}) {
         this._callHook('beforeMount', this)
-        this._instantiate( { propsData, listeners } )
+        this._instantiate({
+          propsData: attributes.props || {}
+        })
         this._setupListeners()
         this.isOpen = true
         this._callHook('mounted', this._contentComponentInstance)
@@ -93,7 +95,7 @@ const Plugin = {
         const content = this._contentComponentInstance
         this._callHook('beforeDestroy', content)
 
-        if( !this.isOpen ) {
+        if (!this.isOpen) {
           return;
         }
 
@@ -104,25 +106,30 @@ const Plugin = {
 
     }
 
-    Vue.mixin( {
+
+    const showComponent = function(Component, attributes = {}) {
+      
+      const vm = this;
+      const modal = new Modal(vm, Component, Plugin.event)
+      modal.open(attributes)
+      return modal
+      
+    }
+
+    Vue.mixin({
 
       computed: {
         $modal() {
           return {
-            show : ( Component, props, listeners ) => {
-
-              const vm = this;
-              const modal = new Modal( vm, Component, Plugin.event )
-              modal.open( props, listeners )
-              return modal
-            }
+            show: showComponent.bind(this),
+            open: showComponent.bind(this)
           }
         }
       }
 
-    } )
+    })
 
-	}
+  }
 }
 
 export default Plugin
