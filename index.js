@@ -2,7 +2,6 @@ import ModalsContainer from './ModalsContainer.vue'
 
 const Plugin = {
   install (Vue, options = {}) {
-    console.log('0.0.122')
 
     if (this.installed) {
       return
