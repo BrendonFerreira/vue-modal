@@ -1,7 +1,7 @@
 {
   "name": "super-vue-modal",
   "description": "Simple and powerful modal creator",
-  "version": "0.0.1",
+  "version": "0.0.12",
   "author": "Brendon Ferreira de Matos <brendonferreiradm@gmail.com>",
   "main": "dist/index.js",
   "repository": {

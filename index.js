@@ -1,7 +1,8 @@
 import ModalsContainer from './ModalsContainer.vue'
 
 const Plugin = {
-  install(Vue, options = {}) {
+  install (Vue, options = {}) {
+    console.log('0.0.122')
 
     if (this.installed) {
       return
@@ -11,11 +12,11 @@ const Plugin = {
 
     this.event = new Vue()
 
-    const AppendChild = function (vm, el, component, componentConfig = {}) {
-      const extended = Vue.extend(component)
+    const AppendChild = function (vm, el, component, config = {}) {
+      const Extended = Vue.extend(component)
 
-      componentConfig['parent'] = vm
-      const instance = new extended(componentConfig)
+      config['parent'] = vm
+      const instance = new Extended(config)
 
       instance.$mount()
       el.appendChild(instance.$el)
@@ -25,8 +26,7 @@ const Plugin = {
 
     class Modal {
 
-
-      constructor(vm, component, eventsVM) {
+      constructor (vm, component, eventsVM) {
         this.event = eventsVM
         this._callHook('beforeCreate', this)
         this.vm = vm
@@ -38,28 +38,28 @@ const Plugin = {
         this._callHook('created', this)
       }
 
-      _callHook(hook, data) {
+      _callHook (hook, data) {
         this.event.$emit(hook, data)
       }
 
-      get $on() {
+      get $on () {
         return this.event.$on
       }
 
-      get $off() {
+      get $off () {
         return this.event.$off
       }
 
-      _createVmChild(target, component, content) {
+      _createVmChild (target, component, content) {
         return AppendChild(this.vm, target, component, content)
       }
 
-      _instantiate(contentConfig) {
+      _instantiate (contentConfig) {
         this._modalContainerInstance = this._createVmChild(this.vm.$root.$el, ModalsContainer, contentConfig)
         this._contentComponentInstance = this._createVmChild(this._modalContainerInstance.$refs.content, this.component, contentConfig)
       }
 
-      _setupListeners() {
+      _setupListeners () {
         this._modalContainerInstance.$on('blank-space-click', () => {
           this.close()
         })
@@ -69,9 +69,9 @@ const Plugin = {
         })
       }
 
-      _destroyInstances() {
+      _destroyInstances () {
         if (this.isDestroyed) {
-          return;
+          return
         }
 
         this.vm.$root.$el.removeChild(this._modalContainerInstance.$el)
@@ -80,23 +80,25 @@ const Plugin = {
         this.isDestroyed = true
       }
 
-      open(attributes = {}) {
+      open (attributes = {}) {
         this._callHook('beforeMount', this)
+
+        const propsData = attributes
+        propsData.config = attributes
         this._instantiate({
-          propsData: attributes.props || {}
+          propsData
         })
         this._setupListeners()
         this.isOpen = true
         this._callHook('mounted', this._contentComponentInstance)
       }
 
-      close() {
-
+      close () {
         const content = this._contentComponentInstance
         this._callHook('beforeDestroy', content)
 
         if (!this.isOpen) {
-          return;
+          return
         }
 
         this._destroyInstances()
@@ -106,20 +108,17 @@ const Plugin = {
 
     }
 
-
-    const showComponent = function(Component, attributes = {}) {
-      
-      const vm = this;
+    const showComponent = function (Component, attributes = {}) {
+      const vm = this
       const modal = new Modal(vm, Component, Plugin.event)
       modal.open(attributes)
       return modal
-      
     }
 
     Vue.mixin({
 
       computed: {
-        $modal() {
+        $modal () {
           return {
             show: showComponent.bind(this),
             open: showComponent.bind(this)
@@ -128,7 +127,6 @@ const Plugin = {
       }
 
     })
-
   }
 }
 

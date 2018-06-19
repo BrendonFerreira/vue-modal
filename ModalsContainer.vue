@@ -2,7 +2,6 @@
 	<div class="wrapper">
   	<div class="backdrop" @click="onWrapperClick($event)">
 			<div class="content" :class="{ 'white-background': !config || !config.transparent }" ref="content">
-			
 			</div> 
   	</div>
 	</div>
